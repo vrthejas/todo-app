@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>To-Do Groups App v1.0</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    form { margin-bottom: 20px; }
+    input, select, button { padding: 5px; margin-right: 10px; }
+    .group { border: 1px solid #ccc; border-radius: 5px; margin-bottom: 15px; }
+    .group-header { padding: 10px; border-bottom: 1px solid #ccc; color: #fff; font-weight: bold; border-top-left-radius: 5px; border-top-right-radius: 5px; }
+    .group-list { padding: 10px; }
+    .todo-item { padding: 5px 0; }
+  </style>
+</head>
+<body>
+  <h1>To-Do Groups App v1.0</h1>
+
+  <!-- Form to add new group -->
+  <form id="group-form">
+    <input type="text" id="group-name" placeholder="Group Name" maxlength="50" required>
+    <input type="color" id="group-color" value="#ff0000">
+    <button type="submit">Add Group</button>
+  </form>
+
+  <!-- Form to add new to-do -->
+  <form id="todo-form">
+    <input type="text" id="todo-text" placeholder="New To-Do (max 100 chars)" maxlength="100" required>
+    <select id="group-select" required>
+      <option value="">Select Group</option>
+    </select>
+    <button type="submit">Add To-Do</button>
+  </form>
+
+  <div id="groups-container"></div>
+
+  <script>
+    const groupForm = document.getElementById('group-form');
+    const todoForm = document.getElementById('todo-form');
+    const groupSelect = document.getElementById('group-select');
+    const groupsContainer = document.getElementById('groups-container');
+    let groups = []; // {id, name, color, todos: []}
+
+    groupForm.addEventListener('submit', e => {
+      e.preventDefault();
+      const name = document.getElementById('group-name').value.trim();
+      const color = document.getElementById('group-color').value;
+      if (!name) return;
+      const id = Date.now().toString();
+      groups.push({id, name, color, todos: []});
+      updateGroupSelect();
+      render();
+      groupForm.reset();
+    });
+
+    todoForm.addEventListener('submit', e => {
+      e.preventDefault();
+      const text = document.getElementById('todo-text').value.trim();
+      const groupId = groupSelect.value;
+      if (!text || !groupId) return;
+      const group = groups.find(g=>g.id===groupId);
+      group.todos.push({id: Date.now().toString(), text});
+      render();
+      todoForm.reset();
+    });
+
+    function updateGroupSelect(){
+      groupSelect.innerHTML = '<option value="">Select Group</option>';
+      groups.forEach(g => {
+        const opt = document.createElement('option');
+        opt.value = g.id; opt.textContent = g.name;
+        groupSelect.appendChild(opt);
+      });
+    }
+
+    function render(){
+      groupsContainer.innerHTML = '';
+      groups.forEach(g => {
+        const groupDiv = document.createElement('div'); groupDiv.className='group';
+        const header = document.createElement('div'); header.className='group-header'; header.style.backgroundColor=g.color; header.textContent=g.name;
+        const list = document.createElement('div'); list.className='group-list';
+        g.todos.forEach(t=>{
+          const item = document.createElement('div'); item.className='todo-item'; item.textContent=t.text;
+          list.appendChild(item);
+        });
+        groupDiv.appendChild(header); groupDiv.appendChild(list);
+        groupsContainer.appendChild(groupDiv);
+      });
+    }
+  </script>
+</body>
+</html>
